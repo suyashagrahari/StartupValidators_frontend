@@ -554,7 +554,10 @@ export default function ValidatePage() {
     }
   }, [lines, termCollapsed]);
 
-  const apiBase = "http://localhost:3001";
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+  const wsBase =
+    process.env.NEXT_PUBLIC_WS_URL ||
+    apiBase.replace(/^https:\/\//, "wss://").replace(/^http:\/\//, "ws://");
 
   const fetchHistory = useCallback(async (bearer = token) => {
     if (!bearer) return;
@@ -572,7 +575,7 @@ export default function ValidatePage() {
     } finally {
       setHistoryLoading(false);
     }
-  }, [token]);
+  }, [token, apiBase]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("sv_token");
@@ -693,7 +696,7 @@ export default function ValidatePage() {
     let wsCompleted = false;
 
     try {
-      const ws = new WebSocket("ws://localhost:3001");
+      const ws = new WebSocket(wsBase);
       connRef.current = ws;
       ws.onopen = () => {
         setWsStatus("ws");
@@ -720,7 +723,7 @@ export default function ValidatePage() {
   function fallbackToSSE(ideaTrimmed: string, descTrimmed: string) {
     setWsStatus("sse");
     const params = new URLSearchParams({ idea: ideaTrimmed, description: descTrimmed, token });
-    const es = new EventSource(`http://localhost:3001/api/research?${params}`);
+    const es = new EventSource(`${apiBase}/api/research?${params}`);
     connRef.current = es;
     es.onmessage = (e) => { try { handleEvent(JSON.parse(e.data)); } catch { /* ignore */ } };
     es.onerror = () => {
