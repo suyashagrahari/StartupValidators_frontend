@@ -555,6 +555,7 @@ export default function ValidatePage() {
   }, [lines, termCollapsed]);
 
   const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001";
+  console.log("apiBase", apiBase);
   const wsBase =
     process.env.NEXT_PUBLIC_WS_URL ||
     apiBase.replace(/^https:\/\//, "wss://").replace(/^http:\/\//, "ws://");
